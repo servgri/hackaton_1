@@ -28,7 +28,6 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('is_bot', sa.Boolean(), nullable=False),
     sa.Column('role', sa.Enum('MODERATOR', 'USER', 'ADMIN', 'BLOCKED', name='userrole'), nullable=True),
-    sa.Column('preferences', sa.JSON(), nullable=True),
     sa.Column('language_code', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

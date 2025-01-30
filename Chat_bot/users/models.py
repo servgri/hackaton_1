@@ -27,7 +27,6 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_bot: Mapped[bool] = mapped_column(Boolean, default=False)
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=True)
-    preferences: Mapped[List] = mapped_column(JSON, nullable=True)
     language_code: Mapped[str | None] = mapped_column(String, nullable=True)
     
     created_at: Mapped[datetime] = mapped_column(
