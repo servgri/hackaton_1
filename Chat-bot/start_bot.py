@@ -1,21 +1,29 @@
-import logging
+import sys
+import os
 import asyncio
+import logging
+import aiohttp
+
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm import context
-import requests
 
-from config import settings
+
 from handlers import register_handlers
+
+# Добавить родительскую директорию в sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import api_settings
+
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
 
 # Создаем экземпляры бота и диспетчера
-bot = Bot(token=settings.API_TOKEN)
+bot = Bot(token=api_settings.API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
 

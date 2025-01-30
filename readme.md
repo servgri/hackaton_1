@@ -2,13 +2,13 @@
 
 ```
 # Создание виртуального окружения для проекта
-python -m venv myvenv
+python -m venv venv
 
 # Активировать виртуальное окружение Для Windoms
-myenv\Scripts\activate
+venv\Scripts\activate
 
 # Активировать виртуальное окружение Для Linux
-source myenv/bin/activate
+source venv/bin/activate
 
 # Отключить виртуальное окружение
 deactivate
