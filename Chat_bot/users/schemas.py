@@ -7,8 +7,7 @@ from models import UserRole
 
 
  # Pydantic модель для валидации
-class SUserModel(BaseModel):
-    id: int | None  # Поле id будет необязательным (обычно задаётся автоматически в БД)
+class SUser(BaseModel):
     telegram_id: int
     first_name: str | None  # Поле full_name необязательное
     last_name: str | None

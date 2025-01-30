@@ -1,10 +1,10 @@
 from typing import  List
 from sqlalchemy import String, Boolean, BigInteger, NullPool, func, DateTime, JSON, ForeignKey, Enum as SAEnum, Integer
-from sqlalchemy.orm import relationship, mapped_column, Mapped
+from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
 
-from db import Base
+from core.db import Base
 
 
 # Определение ролей
@@ -16,11 +16,10 @@ class UserRole(PyEnum):
 
 
 
-class UserModel(Base):
+class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)  # ID записи
-    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)  # Уникальный Telegram ID
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True,primary_key=True, nullable=False)  # Уникальный Telegram ID
 
     first_name: Mapped[str | None] = mapped_column(String, nullable=True)
     last_name: Mapped[str | None] = mapped_column(String, nullable=True)

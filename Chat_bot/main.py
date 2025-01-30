@@ -1,8 +1,8 @@
 import asyncio
-
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand, BotCommandScopeDefault
-from Chat_bot.core.bot import dp, bot
+
+from core.bot import dp, bot
 from users.handlers import router as users_router
 from guide.handlers import router as guide_router
 

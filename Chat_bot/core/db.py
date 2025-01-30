@@ -4,9 +4,9 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import MetaData
 
-from config import db_settings
+from core.config import settings
 
-DATABASE_URL = db_settings.DATABASE_URL
+DATABASE_URL = settings.DATABASE_URL
 
 class Base(DeclarativeBase):
     pass

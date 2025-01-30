@@ -2,7 +2,7 @@ from aiogram import types, Dispatcher, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm import context
 from core.bot import Form
-from users.users_info import user_info_message
+from users.services import user_info_message
 
 router = Router()
 
