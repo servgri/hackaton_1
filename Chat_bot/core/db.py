@@ -1,17 +1,22 @@
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.ext.declarative import declarative_base
-from Chat_bot.core.config import settings
 import asyncio
 
-Base = declarative_base()
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.schema import MetaData
 
+from config import db_settings
+
+DATABASE_URL = db_settings.DATABASE_URL
+
+class Base(DeclarativeBase):
+    pass
 
 async def init_db():
-    engine = create_async_engine(
-        f"postgresql+asyncpg://{settings.DB_USERNAME}:{settings.DB_PASSWORD}@{settings.DB_HOST}:{settings.DB_PORT}/{settings.DB_NAME}")
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    engine = create_async_engine(DATABASE_URL, echo=True)  # echo=True для логов SQL
+    async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
 
 
 if __name__ == "__main__":
     asyncio.run(init_db())
+

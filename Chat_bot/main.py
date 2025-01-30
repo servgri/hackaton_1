@@ -1,18 +1,20 @@
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from aiogram.types import BotCommand
+from aiogram.types import BotCommand, BotCommandScopeDefault
 from Chat_bot.core.bot import dp, bot
 from users.handlers import router as users_router
 from guide.handlers import router as guide_router
 
 
+# Функция, которая настроит командное меню (дефолтное для всех пользователей)
 async def set_commands(bot: Bot):
     commands = [
-        BotCommand(command="/start", description="Начать работу"),
-        BotCommand(command="/upload_image", description="Загрузить изображение"),
+        BotCommand(command="/start", description="Старт")
+        
     ]
-    await bot.set_my_commands(commands)
+    await bot.set_my_commands(commands, BotCommandScopeDefault)
+
 
 
 async def on_startup(dispatcher: Dispatcher):
