@@ -4,7 +4,7 @@ from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
 
-from core.db import Base
+from Chat_bot.core.db import Base
 
 
 # Определение ролей
@@ -26,7 +26,7 @@ class User(Base):
     username:  Mapped[str | None] = mapped_column(String, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_bot: Mapped[bool] = mapped_column(Boolean, default=False)
-    role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=False)
+    role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=True)
     preferences: Mapped[List] = mapped_column(JSON, nullable=True)
     language_code: Mapped[str | None] = mapped_column(String, nullable=True)
     

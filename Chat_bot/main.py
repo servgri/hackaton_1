@@ -1,10 +1,14 @@
 import asyncio
+import logging
 from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 from core.bot import dp, bot
 from users.handlers import router as users_router
 from guide.handlers import router as guide_router
+
+# Настройка логирования
+logging.basicConfig(level=logging.INFO)
 
 
 # Функция, которая настроит командное меню (дефолтное для всех пользователей)

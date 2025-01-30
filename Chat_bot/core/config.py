@@ -13,8 +13,7 @@ class Settings(BaseSettings):
     def DATABASE_URL(self):
         return f"postgresql+asyncpg://{self.DB_USERNAME}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")  # Игнорируем лишние переменные
 
 
 settings = Settings()

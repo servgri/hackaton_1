@@ -28,4 +28,6 @@ alembic init migrations
 alembic revision --autogenerate -m "Create users table"
 # Применение миграции
 alembic upgrade head
+# Откатить миграцию
+alembic downgrade -1
 ```
