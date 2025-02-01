@@ -20,11 +20,12 @@ async def set_commands(bot: Bot):
     await bot.set_my_commands(commands, BotCommandScopeDefault)
 
 
-
+# Функция запуска бота
 async def on_startup(dispatcher: Dispatcher):
     await set_commands(dispatcher.bot)
 
 
+# Асинхронный запуск диспетчера
 async def main():
     # Подключаем роутеры
     dp.include_router(users_router)
@@ -34,5 +35,11 @@ async def main():
     await dp.start_polling(bot, on_startup=on_startup)
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+if __name__ == '__main__':
+       try:
+           asyncio.run(main())
+       except Exception as e:
+           logging.error(f"Ошибка при запуске бота: {str(e)}")
+
+
+

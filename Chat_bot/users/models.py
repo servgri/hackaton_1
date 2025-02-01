@@ -4,7 +4,8 @@ from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
 
-from Chat_bot.core.db import Base
+# from Chat_bot.core.db import Base
+from core.db import Base
 
 
 # Определение ролей

@@ -8,6 +8,7 @@ from alembic import context
 from Chat_bot.core.config import  settings
 from Chat_bot.core.db import Base
 from Chat_bot.users.models import User  # noqa
+from Chat_bot.guide.models import Image  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

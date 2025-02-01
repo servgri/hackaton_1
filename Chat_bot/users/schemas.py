@@ -2,7 +2,6 @@ from datetime import date
 from typing import List
 
 from pydantic import BaseModel, ConfigDict
-
 from models import UserRole
 
 
@@ -21,3 +20,12 @@ class SUser(BaseModel):
     updated_at: date
 
     model_config = ConfigDict(from_attributes=True)  # Включаем поддержку ORM-моделей для преобразования из SQLAlchemy объектов
+
+
+class UserInfo(BaseModel):
+    telegram_id: int
+    first_name: str | None
+    last_name: str | None
+    username: str | None
+    language_code: str | None
+    is_bot: bool
