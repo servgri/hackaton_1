@@ -2,7 +2,7 @@ from datetime import date
 from typing import List
 
 from pydantic import BaseModel, ConfigDict
-from models import UserRole
+from users.models import UserRole
 
 
  # Pydantic модель для валидации

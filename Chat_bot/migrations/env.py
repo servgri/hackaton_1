@@ -1,9 +1,15 @@
 from logging.config import fileConfig
+import sys
+from os.path import abspath, dirname
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+
+
+# Поднимаемся на три уровня вверх от текущего файла
+sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 
 from Chat_bot.core.config import  settings
 from Chat_bot.core.db import Base

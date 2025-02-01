@@ -20,8 +20,7 @@ class UserRole(PyEnum):
 class User(Base):
     __tablename__ = "users"
 
-    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True,primary_key=True, nullable=False)  # Уникальный Telegram ID
-
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, primary_key=True, nullable=False)  # Уникальный Telegram ID
     first_name: Mapped[str | None] = mapped_column(String, nullable=True)
     last_name: Mapped[str | None] = mapped_column(String, nullable=True)
     username:  Mapped[str | None] = mapped_column(String, nullable=True)

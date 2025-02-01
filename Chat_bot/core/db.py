@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, Asyn
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.schema import MetaData
 
-#from Chat_bot.core.config import settings
+# from Chat_bot.core.config import settings
 from core.config import settings
 
 DATABASE_URL = settings.DATABASE_URL
