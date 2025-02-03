@@ -22,8 +22,11 @@ async def fallback_save_to_file(user_info: dict):
         logging.error(f"Не удалось записать данные пользователя в файл: {e}")
 
 
-# Вынесенная функция для формирования итогового сообщения
+
 async def send_final_request(message: types.Message, state: context.FSMContext):
+    """ 
+    Вынесенная функция для формирования итогового сообщения
+    """
     # Получаем данные состояния
     data = await state.get_data()
 

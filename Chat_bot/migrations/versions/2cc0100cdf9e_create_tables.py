@@ -1,18 +1,19 @@
 """Create tables
 
-Revision ID: bb3dfc2e52d3
+Revision ID: 2cc0100cdf9e
 Revises: 
-Create Date: 2025-02-03 20:06:23.895532
+Create Date: 2025-02-03 23:13:57.745836
 
 """
 from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from pgvector.sqlalchemy import Vector
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'bb3dfc2e52d3'
+revision: str = '2cc0100cdf9e'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,6 +34,7 @@ def upgrade() -> None:
     sa.Column('author_patronymic', sa.String(), nullable=False),
     sa.Column('date_category', sa.String(), nullable=False),
     sa.Column('cluster', sa.Integer(), nullable=True),
+    sa.Column('embedding', Vector(dim=768), nullable=False),
     sa.Column('key_words', sa.String(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),

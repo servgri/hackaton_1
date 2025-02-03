@@ -2,9 +2,10 @@ from datetime import date
 from sqlalchemy import String, Date, Integer, func, DateTime, BigInteger
 from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
+from pgvector.sqlalchemy import Vector
 
 from Chat_bot.core.db import Base
-#from core.db import Base
+# from core.db import Base
 
 class Image(Base):
     __tablename__ = "images_1"
@@ -21,6 +22,7 @@ class Image(Base):
     author_patronymic: Mapped[str] = mapped_column(String, nullable=False)
     date_category: Mapped[str] = mapped_column(String, nullable=False)
     cluster: Mapped[int] = mapped_column(Integer, nullable=True)
+    embedding: Mapped[list[float]] = mapped_column(Vector(768), nullable=False)
     key_words: Mapped[str] = mapped_column(String, nullable=False)
     
 
