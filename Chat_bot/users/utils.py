@@ -48,3 +48,4 @@ async def send_final_request(message: types.Message, state: context.FSMContext):
         "author": data.get('author'),
         "keywords": data.get('keywords')
     }
+    print(preferences)

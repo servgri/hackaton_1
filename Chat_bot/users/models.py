@@ -20,30 +20,16 @@ class UserRole(PyEnum):
 class User(Base):
     __tablename__ = "users"
 
-    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, primary_key=True, nullable=False)  # Уникальный Telegram ID
+    telegram_id: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, index=True)  # Уникальный Telegram ID
     first_name: Mapped[str | None] = mapped_column(String, nullable=True)
     last_name: Mapped[str | None] = mapped_column(String, nullable=True)
-    username:  Mapped[str | None] = mapped_column(String, nullable=True)
+    username:  Mapped[str | None] = mapped_column(String, nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_bot: Mapped[bool] = mapped_column(Boolean, default=False)
-    role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=True)
-    language_code: Mapped[str | None] = mapped_column(String, nullable=True)
-    
-    created_at: Mapped[datetime] = mapped_column(
-    DateTime(timezone=True), 
-    default=lambda: datetime.now(timezone.utc), 
-    server_default=func.now()
-)
-
-    updated_at: Mapped[datetime] = mapped_column(
-    DateTime(timezone=True), 
-    default=lambda: datetime.now(timezone.utc), 
-    server_default=func.now(), 
-    onupdate=func.now()
-)
+    role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=True, default='USER')
+    language_code: Mapped[str | None] = mapped_column(String, nullable=True, default='ru')    
 
 
-    
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"

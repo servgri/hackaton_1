@@ -30,4 +30,6 @@ alembic revision --autogenerate -m "Create users table"
 alembic upgrade head
 # Откатить миграцию
 alembic downgrade -1
+# Смотреть состояние миграции
+alembic current
 ```
