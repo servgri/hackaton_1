@@ -13,7 +13,7 @@ dp = Dispatcher(storage=storage)
 
 # Определяем состояния для FSM
 class Form(StatesGroup):
-    phrase = State()  # Состояние для фразы
-    author = State()  # Состояние при выборе Автора
-    keywords = State()  # Состояние при выборе Ключевых слов
-
+    menu = State()  # Главное меню
+    phrase = State()  # Состояние для ввода фразы
+    author = State()  # Состояние для выбора автора
+    keywords = State()  # Состояние для выбора ключевых слов

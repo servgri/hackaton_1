@@ -7,8 +7,8 @@ from sqlalchemy import String, LargeBinary, Date, Integer, func, DateTime, BigIn
 from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
 
-from Chat_bot.core.config import settings
-# from core.config import settings
+# from Chat_bot.core.config import settings
+from core.config import settings
 
 DATABASE_URL = settings.DATABASE_URL
 
@@ -22,7 +22,7 @@ async_session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, autoc
 
 # Базовый класс для всех моделей
 class Base(DeclarativeBase):
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    
     created_at: Mapped[datetime] = mapped_column(
                                  DateTime(timezone=True), 
                                 default=lambda: datetime.now(timezone.utc), 

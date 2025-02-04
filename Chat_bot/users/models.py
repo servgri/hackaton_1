@@ -4,8 +4,8 @@ from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
 from enum import Enum as PyEnum
 
-from Chat_bot.core.db import Base
-# from core.db import Base
+# from Chat_bot.core.db import Base
+from core.db import Base
 
 
 # Определение ролей
@@ -20,10 +20,10 @@ class UserRole(PyEnum):
 class User(Base):
     __tablename__ = "users"
 
-    telegram_id: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, index=True)  # Уникальный Telegram ID
+    telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, primary_key=True, nullable=False)   # Уникальный Telegram ID
     first_name: Mapped[str | None] = mapped_column(String, nullable=True)
     last_name: Mapped[str | None] = mapped_column(String, nullable=True)
-    username:  Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    username:  Mapped[str | None] = mapped_column(String, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_bot: Mapped[bool] = mapped_column(Boolean, default=False)
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=True, default='USER')

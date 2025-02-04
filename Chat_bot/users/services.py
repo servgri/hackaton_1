@@ -1,13 +1,9 @@
 import logging
-from datetime import datetime, timezone
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from datetime import datetime, timezone
-from core.db import  async_session_maker 
-from users.models import User
-from aiogram.types import User as TelegramUser
-# from models import User
+from aiogram import types
+from aiogram.fsm import context
 from users.schemas import UserInfo
+from users.keyboard import create_main_keyboard
+from guide.services import recommend_by_cluster
 
 
 async def user_info_message(message) -> UserInfo:
@@ -20,23 +16,51 @@ async def user_info_message(message) -> UserInfo:
         is_bot=message.from_user.is_bot,
     )
 
-async def save_user_to_db(user_info: UserInfo):
-    async with async_session_maker() as session:  # Открываем сессию
-        async with session.begin():  # Обособляем операцию в транзакцию
-            # Ищем пользователя в базе данных по его telegram_id
-            user_in_db = await session.get(User, user_info.telegram_id)
-            
-            if not user_in_db:  # Если пользователь не найден
-                # Создаём запись нового пользователя
-                user_in_db = User(**user_info.model_dump())  # Преобразуем Pydantic модель в dict
-                session.add(user_in_db)  # Добавляем нового пользователя в сессию
-            else:
-                # Если пользователь уже существует, обновляем данные полей
-                update_data = user_info.model_dump(exclude_unset=True)  
-                # exclude_unset: обновляет только те данные, которые явно переданы в модели UserInfo
-                for key, value in update_data.items():
-                    setattr(user_in_db, key, value)  # Устанавливаем новые значения атрибутов
-            
-        # Завершаем транзакцию (commit), изменения сохраняются в БД
-        await session.commit()
+# Общая функция формирования итогового сообщения
+async def send_final_request(message: types.Message, state: context.FSMContext):
+    """ 
+    Финальная функция для формирования и отправки запроса
+    """
+    # Получаем данные состояния
+    data = await state.get_data()
+
+    # Формируем сообщение
+    final_message = (
+        f"Ваш запрос собран:\n"
+        f"Предпочтения: {data.get('phrase', 'не указаны')}\n"
+        f"Ключевые слова: {data.get('keywords', 'не указаны')}\n"
+        f"Автор: {data.get('author', 'не указан')}\n"
+        f"Спасибо за выбор! Подбираем рекомендации..."
+    )
+
+    # Отправляем сообщение пользователю
+    await message.answer(final_message, reply_markup=create_main_keyboard())
+
+    # Очищаем состояние
+    await state.clear()
+
+    # Формируем строку запроса для модели
+    query = f"{data.get('phrase', '')} {data.get('keywords', '')} {data.get('author', '')}".strip()
+   
+   # Проверка: если нет содержимого запроса, отправляем ошибку
+    if not query:
+        await message.answer("Вы не указали предпочтения. Пожалуйста, попробуйте снова.")
+        return
+    
+    # Логируем запрос
+    logging.info(f"Итоговый запрос пользователя: {query}")
+   
+   # Передаём запрос в функциях рекомендаций
+    recommendations = recommend_by_cluster(query)
+
+     # Отправляем рекомендации пользователю
+    if recommendations is not None and not recommendations.empty:
+        recommendation_text = "\n".join(
+            [f"• {row['title']} (Кластер: {row['cluster']})" for _, row in recommendations.iterrows()]
+        )
+        await message.answer(f"Мы нашли несколько экспонатов для вас:\n{recommendation_text}")
+    else:
+        await message.answer("К сожалению, мы не смогли найти подходящие экспонаты для вашего запроса.")
+   
+
 

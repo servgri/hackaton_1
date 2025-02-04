@@ -4,12 +4,13 @@ from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
 from pgvector.sqlalchemy import Vector
 
-from Chat_bot.core.db import Base
-# from core.db import Base
+# from Chat_bot.core.db import Base
+from core.db import Base
 
 class Image(Base):
     __tablename__ = "images_1"
 
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     catalog_num: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False, index=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
     items: Mapped[str] = mapped_column(String, nullable=False)

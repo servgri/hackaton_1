@@ -14,7 +14,6 @@ class SUser(BaseModel):
     is_active: bool = True
     is_bot: bool = False
     role: UserRole  # Указываем тип Enum для роли
-    preferences: List[str] | None # preferences - это список строк или None
     language_code: str | None
     created_at: date
     updated_at: date
@@ -29,3 +28,5 @@ class UserInfo(BaseModel):
     username: str | None
     language_code: str | None
     is_bot: bool
+
+    
