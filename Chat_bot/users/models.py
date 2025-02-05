@@ -27,7 +27,18 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_bot: Mapped[bool] = mapped_column(Boolean, default=False)
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), nullable=True, default='USER')
-    language_code: Mapped[str | None] = mapped_column(String, nullable=True, default='ru')    
+    language_code: Mapped[str | None] = mapped_column(String, nullable=True, default='ru')   
+    created_at: Mapped[datetime] = mapped_column(
+                                 DateTime(timezone=True), 
+                                default=lambda: datetime.now(timezone.utc), 
+                                server_default=func.now()
+                                )
+    updated_at: Mapped[datetime] = mapped_column(
+                                DateTime(timezone=True), 
+                                default=lambda: datetime.now(timezone.utc), 
+                                server_default=func.now(), 
+                                onupdate=func.now()
+                                ) 
 
 
     @property
