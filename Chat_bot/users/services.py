@@ -3,7 +3,8 @@ from aiogram import types
 from aiogram.fsm import context
 from users.schemas import UserInfo
 from users.keyboard import create_main_keyboard
-from guide.services import recommend_by_cluster
+from guide.services import recommend_by_kmeans_knn, get_exhibits_by_indices
+
 
 
 async def user_info_message(message) -> UserInfo:
@@ -47,23 +48,28 @@ async def send_final_request(message: types.Message, state: context.FSMContext):
     }
 
     # Формируем строку запроса для модели
-    query = f"{data.get('phrase', '')} {data.get('keywords', '')}".strip()
+    user_query = f"{data.get('phrase', '')} {data.get('keywords', '')}".strip()
    
    # Проверка: если нет содержимого запроса, отправляем ошибку
-    if not query:
+    if not user_query:
         await message.answer("Вы не указали предпочтения. Пожалуйста, попробуйте снова.")
         return
     
     # Логируем запрос
-    logging.info(f"Итоговый запрос пользователя: {query}")
+    logging.info(f"Итоговый запрос пользователя: {user_query}")
    
-   # Передаём запрос в функциях рекомендаций
-    recommendations = recommend_by_cluster(query)
+   
+    recommended_indices = recommend_by_kmeans_knn(user_query, embeddings, kmeans_model)
+
+    # Получаем рекомендованные экспонаты
+    recommended_exhibits = get_exhibits_by_indices(recommended_indices)
+    print(recommended_exhibits, sep='\n')
+   
 
      # Отправляем рекомендации пользователю
-    if recommendations is not None and not recommendations.empty:
+    if recommended_exhibits is not None and not recommended_exhibits.empty:
         recommendation_text = "\n".join(
-            [f"• {row['title']} (Кластер: {row['cluster']})" for _, row in recommendations.iterrows()]
+            [f"• {row['title']} (Кластер: {row['cluster']})" for _, row in recommended_exhibits.iterrows()]
         )
         await message.answer(f"Мы нашли несколько экспонатов для вас:\n{recommendation_text}")
     else:

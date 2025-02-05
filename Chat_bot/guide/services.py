@@ -1,95 +1,183 @@
-import logging
 import numpy as np
-import pickle
-from sklearn.cluster import KMeans
+import pandas as pd
+from sklearn.neighbors import NearestNeighbors
 from transformers import BertTokenizer, BertModel
 import torch
-import psycopg2
+from dotenv import load_dotenv
+import os
+import ast
+import joblib  # Для загрузки k-means модели
+from sqlalchemy import create_engine
 
-# # Загрузка моделей и данных
-# with open('kmeans_model.pkl', 'rb') as f:
-#     kmeans_model = pickle.load(f)
+# === Загрузка модели KMeans ===
+kmeans_model = joblib.load("Model\data\kmeans_model.joblib")
 
-# with open('rubert_embeddings.pkl', 'rb') as f:
-#     data = pickle.load(f)
+# === Загрузка переменных окружения ===
+load_dotenv()
 
-# # Загрузка RuBERT модели и токенизатора
-# model_name = 'rubert-base-cased' 
-# tokenizer = BertTokenizer.from_pretrained(model_name)
-# model = BertModel.from_pretrained(model_name)
+db_host = os.getenv('DB_HOST')
+db_port = os.getenv('DB_PORT')
+db_name = os.getenv('DB_NAME')
+db_user = os.getenv('DB_USERNAME')
+db_password = os.getenv('DB_PASSWORD')
 
+DATABASE_URL = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
 
-# # Функция для получения эмбеддингов запроса
-# def get_embeddings(query):
-#     inputs = tokenizer(query, padding=True, truncation=True, return_tensors="pt", max_length=512)
-#     with torch.no_grad():
-#         outputs = model(**inputs)
-#         embeddings = outputs.last_hidden_state.mean(dim=1)
-#     return embeddings
+# Создаем движок для подключения к базе данных
+engine = create_engine(DATABASE_URL)
 
-# def resize_embedding(embedding, target_dim):
-#     current_dim = embedding.shape[1]
-#     if current_dim == target_dim:
-#         return embedding
-#     if current_dim < target_dim:
-#         padding = np.zeros((embedding.shape[0], target_dim - current_dim))
-#         return np.hstack([embedding, padding])
-#     return embedding[:, :target_dim]
-
-# # Рекомендация экспонатов по кластеру
-# def recommend_by_cluster(query, data, kmeans_model, n_recommendations=5):
-#     # Получаем целевую размерность из KMeans
-#     target_dim = kmeans_model.cluster_centers_.shape[1]
-#     # Получаем эмбеддинг запроса
-#     query_embedding = get_embeddings([query]).numpy()
-#     # Приводим эмбеддинг к нужной размерности
-#     query_embedding_resized = resize_embedding(query_embedding, target_dim)
-#     query_cluster = kmeans_model.predict(query_embedding_resized)
-#     recommended_items = data[data['cluster'] == query_cluster[0]].head(n_recommendations)
-#     return recommended_items
-
-
-conn = psycopg2.connect(
-    dbname="ai_guide",
-    user="ai_guide_user",
-    password="16Fc1RUz4gmNFFgGmYroN1WDH9pz5dYR",
-    host="dpg-cu4k1852ng1s738itvc0-a.frankfurt-postgres.render.com",
-    port="5432"
-)
-cursor = conn.cursor()
-
-
-# Загрузка RuBERT модели и токенизатора
-model_name = 'rubert-base-cased'
+# === Загрузка модели RuBERT ===
+model_name = 'DeepPavlov/rubert-base-cased'
 tokenizer = BertTokenizer.from_pretrained(model_name)
 model = BertModel.from_pretrained(model_name)
+model.eval()  # Переключаем в режим инференса
 
-# Функция для получения эмбеддингов запроса
+# === Загрузка эмбеддингов из базы данных ===
+query = "SELECT  catalog_num, title, author, date_category, embeddings FROM images"
+df = pd.read_sql(query, engine)
+
+# Проверка типов данных
+print(df.dtypes)
+
+# Преобразуем эмбеддинги в numpy-массив
+# embeddings = np.vstack(df["embeddings"].apply(np.array))  # Предполагаем, что эмбеддинги хранятся как списки
+# Функция для преобразования строк в массивы
+def convert_to_array(embedding_string):
+    try:
+        return np.array(ast.literal_eval(embedding_string))
+    except Exception as e:
+        print(f"Ошибка преобразования: {e}")
+        return np.array([])  # Возвращаем пустой массив
+
+# Применяем преобразование
+df['embeddings'] = df['embeddings'].apply(convert_to_array)
+
+# Удаляем пустые массивы, если это необходимо
+df = df[df['embeddings'].apply(lambda x: x.size > 0)]
+
+# Пробуем встраивание массивов в один, если они всех одного размера
+try:
+    embeddings = np.vstack(df['embeddings'].to_numpy())
+except ValueError as e:
+    print(f"Ошибка при вертикальном сложении: {e}")
+
+# === Функция для получения эмбеддингов запроса ===
 def get_embeddings(query):
     inputs = tokenizer(query, padding=True, truncation=True, return_tensors="pt", max_length=512)
     with torch.no_grad():
         outputs = model(**inputs)
-        embeddings = outputs.last_hidden_state.mean(dim=1).numpy()
-    return embeddings[0]  # Преобразуем в 1D массив
+        embeddings = outputs.last_hidden_state.mean(dim=1)  # Усредняем по нужной размерности
+    return embeddings.cpu().numpy()  # Переводим в numpy
 
-# Рекомендация экспонатов по кластеру
-def recommend_by_cluster(query, conn, n_recommendations=5):
-    # Получаем эмбеддинг запроса
-    query_embedding = get_embeddings([query])
-    
-    # Находим ближайший кластер с помощью kmeans
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, center FROM clusters ORDER BY center <-> %s LIMIT 1;", (query_embedding,))
-    cluster_id = cursor.fetchone()[0]
-    
-    # Получаем рекомендованные объекты из этого кластера
-    cursor.execute("SELECT title, author, date_category FROM images WHERE cluster_id = %s ORDER BY embedding <-> %s LIMIT %s;", 
-                   (cluster_id, query_embedding, n_recommendations))
-    recommended_items = cursor.fetchall()
-    
-    return recommended_items
 
-user_query = "картина, изображающая пейзаж с озером"
-recommendations = recommend_by_cluster(user_query, conn)
+# === Функция рекомендаций через KMeans + KNN ===
+def recommend_by_kmeans_knn(query, embeddings, kmeans_model, n_recommendations=10):
+    query_embedding = get_embeddings(query)  # Уже numpy
+    query_cluster = kmeans_model.predict(query_embedding)[0]  # Получаем кластер
+    cluster_indices = np.where(kmeans_model.labels_ == query_cluster)[0]  # Выбираем объекты из кластера
 
-print(recommendations)
+    cluster_embeddings = embeddings[cluster_indices]  # Берем их эмбеддинги
+
+    # Создаем KNN-модель
+    nn_model = NearestNeighbors(n_neighbors=n_recommendations, metric='cosine')
+    nn_model.fit(cluster_embeddings)
+
+    distances, indices = nn_model.kneighbors(query_embedding)
+
+    recommended_indices = cluster_indices[indices.flatten()]  # Переводим в индексы исходного массива
+    return recommended_indices
+
+
+# === Функция получения экспонатов по индексам ===
+def get_exhibits_by_indices(indices):
+    return df.iloc[indices][["catalog_num", "title", "author", "date_category"]].to_dict(orient="records")
+
+
+# === Пример использования ===
+# user_query = "Айвазовский море"
+# recommended_indices = recommend_by_kmeans_knn(user_query, embeddings, kmeans_model)
+
+# Получаем рекомендованные экспонаты
+# recommended_exhibits = get_exhibits_by_indices(recommended_indices)
+# print(recommended_exhibits, sep='\n')
+
+
+#===Отрабатывание модели на файлах===
+
+# import numpy as np
+# import pandas as pd
+# from sklearn.neighbors import NearestNeighbors
+# from transformers import BertTokenizer, BertModel
+# import torch
+# from dotenv import load_dotenv
+# import os
+# import joblib  # Для загрузки k-means модели
+
+# # === Загрузка модели KMeans ===
+
+# kmeans_model = joblib.load("Model\data\kmeans_model.joblib")
+
+# # === Загрузка переменных окружения ===
+# load_dotenv()
+
+# db_host = os.getenv('DB_HOST')
+# db_port = os.getenv('DB_PORT')
+# db_name = os.getenv('DB_NAME')
+# db_user = os.getenv('DB_USERNAME')
+# db_password = os.getenv('DB_PASSWORD')
+
+# DATABASE_URL = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+
+# # === Загрузка модели RuBERT ===
+# model_name = 'DeepPavlov/rubert-base-cased'
+# tokenizer = BertTokenizer.from_pretrained(model_name)
+# model = BertModel.from_pretrained(model_name)
+# model.eval()  # Переключаем в режим инференса
+
+# # === Загрузка эмбеддингов из parquet ===
+# df = pd.read_parquet('data_for_database_final.parquet')
+# df["catalog_num"] = df.index
+
+# # Преобразуем эмбеддинги в numpy-массив
+# embeddings = np.vstack(df["embeddings"].apply(np.array))  # Если хранятся как списки
+
+
+# # === Функция для получения эмбеддингов запроса ===
+# def get_embeddings(query):
+#     inputs = tokenizer(query, padding=True, truncation=True, return_tensors="pt", max_length=512)
+#     with torch.no_grad():
+#         outputs = model(**inputs)
+#         embeddings = outputs.last_hidden_state.mean(dim=1)  # Усредняем по нужной размерности
+#     return embeddings.cpu().numpy()  # Переводим в numpy
+
+
+# # === Функция рекомендаций через KMeans + KNN ===
+# def recommend_by_kmeans_knn(query, embeddings, kmeans_model, n_recommendations=10):
+#     query_embedding = get_embeddings(query)  # Уже numpy
+#     query_cluster = kmeans_model.predict(query_embedding)[0]  # Получаем кластер
+#     cluster_indices = np.where(kmeans_model.labels_ == query_cluster)[0]  # Выбираем объекты из кластера
+
+#     cluster_embeddings = embeddings[cluster_indices]  # Берем их эмбеддинги
+
+#     # Создаем KNN-модель
+#     nn_model = NearestNeighbors(n_neighbors=n_recommendations, metric='cosine')
+#     nn_model.fit(cluster_embeddings)
+
+#     distances, indices = nn_model.kneighbors(query_embedding)
+
+#     recommended_indices = cluster_indices[indices.flatten()]  # Переводим в индексы исходного массива
+#     return recommended_indices
+
+
+# # === Функция получения экспонатов по индексам ===
+# def get_exhibits_by_indices(indices):
+#     return df.iloc[indices][["catalog_num", "title", "author", "date_category"]].to_dict(orient="records")
+
+
+# # === Пример использования ===
+# user_query = "Айвазовский море"
+# recommended_indices = recommend_by_kmeans_knn(user_query, embeddings, kmeans_model)
+
+# # Получаем рекомендованные экспонаты
+# recommended_exhibits = get_exhibits_by_indices(recommended_indices)
+# print(recommended_exhibits, sep='\n')

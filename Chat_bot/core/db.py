@@ -22,7 +22,8 @@ async_session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, autoc
 
 # Базовый класс для всех моделей
 class Base(DeclarativeBase):
-    pass
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    
    
 
 # if __name__ == "__main__":

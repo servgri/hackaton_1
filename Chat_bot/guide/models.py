@@ -9,8 +9,7 @@ from core.db import Base
 
 class Image(Base):
     __tablename__ = "images"
-
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    
     title: Mapped[str]  # nullable=False по умолчанию
     items: Mapped[str] 
     description: Mapped[str] 
