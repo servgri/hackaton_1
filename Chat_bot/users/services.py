@@ -39,8 +39,15 @@ async def send_final_request(message: types.Message, state: context.FSMContext):
     # Очищаем состояние
     await state.clear()
 
+    #Формируем строку для поисковика
+    preferences = {
+        "phrase": data.get('phrase'),
+        "author": data.get('author'),
+        "keywords": data.get('keywords')
+    }
+
     # Формируем строку запроса для модели
-    query = f"{data.get('phrase', '')} {data.get('keywords', '')} {data.get('author', '')}".strip()
+    query = f"{data.get('phrase', '')} {data.get('keywords', '')}".strip()
    
    # Проверка: если нет содержимого запроса, отправляем ошибку
     if not query:
