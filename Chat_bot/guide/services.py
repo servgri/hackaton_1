@@ -50,11 +50,11 @@ import psycopg2
 
 
 conn = psycopg2.connect(
-    dbname="ai_guide",
-    user="ai_guide_user",
-    password="16Fc1RUz4gmNFFgGmYroN1WDH9pz5dYR",
-    host="dpg-cu4k1852ng1s738itvc0-a.frankfurt-postgres.render.com",
-    port="5432"
+    dbname="",
+    user="",
+    password="",
+    host="",
+    port=""
 )
 cursor = conn.cursor()
 
