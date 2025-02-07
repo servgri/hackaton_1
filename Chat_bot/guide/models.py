@@ -3,9 +3,7 @@ from sqlalchemy import String, Date, Integer, func, DateTime, BigInteger
 from sqlalchemy.orm import  mapped_column, Mapped
 from datetime import datetime, timezone
 from pgvector.sqlalchemy import Vector
-
-# from Chat_bot.core.db import Base
-from core.db import Base
+from Chat_bot.core.db import Base
 
 class Image(Base):
     __tablename__ = "images"
