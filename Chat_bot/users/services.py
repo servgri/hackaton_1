@@ -1,10 +1,9 @@
 import logging
 from aiogram import types
 from aiogram.fsm import context
-from users.schemas import UserInfo
-from users.keyboard import create_main_keyboard
-from guide.services import recommend_by_kmeans_knn, get_exhibits_by_indices
-
+from Chat_bot.users.schemas import UserInfo
+from Chat_bot.users.keyboard import create_main_keyboard
+from Chat_bot.guide.recommendation_system import get_recommendations
 
 
 async def user_info_message(message) -> UserInfo:
@@ -57,23 +56,25 @@ async def send_final_request(message: types.Message, state: context.FSMContext):
     
     # Логируем запрос
     logging.info(f"Итоговый запрос пользователя: {user_query}")
-   
-   
-    recommended_indices = recommend_by_kmeans_knn(user_query, embeddings, kmeans_model)
+    # return user_query
+    # 
+    try:
+        recommendations = get_recommendations(user_query)
 
-    # Получаем рекомендованные экспонаты
-    recommended_exhibits = get_exhibits_by_indices(recommended_indices)
-    print(recommended_exhibits, sep='\n')
-   
+        #  Формируем ответ с рекомендациями
+        if recommendations:
+            recommendation_text = "\n".join(
+                [f"• {item['title']} (Автор: {item['author']}, Категория даты: {item['date_category']})"
+                 for item in recommendations]
+            )
 
-     # Отправляем рекомендации пользователю
-    if recommended_exhibits is not None and not recommended_exhibits.empty:
-        recommendation_text = "\n".join(
-            [f"• {row['title']} (Кластер: {row['cluster']})" for _, row in recommended_exhibits.iterrows()]
-        )
-        await message.answer(f"Мы нашли несколько экспонатов для вас:\n{recommendation_text}")
-    else:
-        await message.answer("К сожалению, мы не смогли найти подходящие экспонаты для вашего запроса.")
-   
+            # Отправляем рекомендации пользователю
+            await message.answer(f"Мы нашли несколько экспонатов для вас:\n{recommendation_text}")
+        else:
+            # Если экспонатов нет
+            await message.answer("К сожалению, мы не нашли подходящих экспонатов для вашего запроса.")
+    except Exception as e:
+        logging.error(f"Ошибка при обработке запроса: {e}")
+        await message.answer("Произошла ошибка во время обработки вашего запроса. Попробуйте позже.")
 
 
