@@ -1,9 +1,7 @@
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.fsm.state import State, StatesGroup
-
-from core.config import settings
-# from config import settings
+from config import settings
 
 
 # Создаем экземпляры бота и диспетчера
