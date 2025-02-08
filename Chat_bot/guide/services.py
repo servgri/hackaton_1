@@ -30,11 +30,29 @@ def load_data(data_path='data_for_database_final2.parquet'):
     embeddings = np.vstack(df["embeddings"].apply(np.array))  # Преобразуем эмбеддинги в numpy-массив
     return df, embeddings
 
-def get_query_embedding(user_query, tokenizer, model):
+
+conn = psycopg2.connect(
+    dbname="",
+    user="",
+    password="",
+    host="",
+    port=""
+)
+cursor = conn.cursor()
+
+
+# Загрузка RuBERT модели и токенизатора
+model_name = 'rubert-base-cased'
+tokenizer = BertTokenizer.from_pretrained(model_name)
+model = BertModel.from_pretrained(model_name)
+
+# Функция для получения эмбеддингов запроса
+def get_embeddings(query):
     """
     Преобразование текстового запроса пользователя в эмбеддинг.
     """
-    inputs = tokenizer(user_query, padding=True, truncation=True, return_tensors="pt", max_length=512)
+    inputs = tokenizer(query, padding=True, truncation=True, return_tensors="pt", max_length=512)
+
     with torch.no_grad():
         outputs = model(**inputs)
         query_embedding = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()
