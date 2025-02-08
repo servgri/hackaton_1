@@ -56,7 +56,7 @@
 
 Датасет разбит на 20 кластеров.
 
-![alt text](image.png)
+![image](https://github.com/user-attachments/assets/b26b27d4-d42a-4006-9c89-304498cb3f51)
 
 ### 3.3. Рекомендательная система на основе KMeans + KNN
 
