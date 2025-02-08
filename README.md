@@ -67,7 +67,7 @@
 - Python
 - PostgreSQL
 - aiogram
-- SqlAlchimy
+- SqlAlchemy
 
 ## 5. Инструкция для запуска телеграм-бота
 
