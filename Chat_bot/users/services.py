@@ -1,9 +1,9 @@
 import logging
 from aiogram import types
 from aiogram.fsm import context
-from users.schemas import UserInfo
-from users.keyboard import create_main_keyboard
-from guide.services import recommend_by_cluster
+from Chat_bot.users.schemas import UserInfo
+from Chat_bot.users.keyboard import create_main_keyboard
+from Chat_bot.guide.recommendation_system import get_recommendations
 
 
 async def user_info_message(message) -> UserInfo:
@@ -47,27 +47,34 @@ async def send_final_request(message: types.Message, state: context.FSMContext):
     }
 
     # Формируем строку запроса для модели
-    query = f"{data.get('phrase', '')} {data.get('keywords', '')}".strip()
+    user_query = f"{data.get('phrase', '')} {data.get('keywords', '')}".strip()
    
    # Проверка: если нет содержимого запроса, отправляем ошибку
-    if not query:
+    if not user_query:
         await message.answer("Вы не указали предпочтения. Пожалуйста, попробуйте снова.")
         return
     
     # Логируем запрос
-    logging.info(f"Итоговый запрос пользователя: {query}")
-   
-   # Передаём запрос в функциях рекомендаций
-    recommendations = recommend_by_cluster(query)
+    logging.info(f"Итоговый запрос пользователя: {user_query}")
+    # return user_query
+    # 
+    try:
+        recommendations = get_recommendations(user_query)
 
-     # Отправляем рекомендации пользователю
-    if recommendations is not None and not recommendations.empty:
-        recommendation_text = "\n".join(
-            [f"• {row['title']} (Кластер: {row['cluster']})" for _, row in recommendations.iterrows()]
-        )
-        await message.answer(f"Мы нашли несколько экспонатов для вас:\n{recommendation_text}")
-    else:
-        await message.answer("К сожалению, мы не смогли найти подходящие экспонаты для вашего запроса.")
-   
+        #  Формируем ответ с рекомендациями
+        if recommendations:
+            recommendation_text = "\n".join(
+                [f"• {item['title']} (Автор: {item['author']}, Категория даты: {item['date_category']})"
+                 for item in recommendations]
+            )
+
+            # Отправляем рекомендации пользователю
+            await message.answer(f"Мы нашли несколько экспонатов для вас:\n{recommendation_text}")
+        else:
+            # Если экспонатов нет
+            await message.answer("К сожалению, мы не нашли подходящих экспонатов для вашего запроса.")
+    except Exception as e:
+        logging.error(f"Ошибка при обработке запроса: {e}")
+        await message.answer("Произошла ошибка во время обработки вашего запроса. Попробуйте позже.")
 
 

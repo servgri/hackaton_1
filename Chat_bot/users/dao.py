@@ -1,11 +1,6 @@
-import logging
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-
-from core.db import  async_session_maker 
-from users.models import User
-from aiogram.types import User as TelegramUser
-from users.schemas import UserInfo
+from Chat_bot.core.db import  async_session_maker 
+from Chat_bot.users.models import User
+from Chat_bot.users.schemas import UserInfo
 
 
 async def save_user_to_db(user_info: UserInfo):

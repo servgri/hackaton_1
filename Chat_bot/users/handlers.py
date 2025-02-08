@@ -3,11 +3,11 @@ from aiogram import types, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm import context
 
-from core.bot import Form
-from users.dao import save_user_to_db
-from users.services import  user_info_message, send_final_request
-from users. utils import fallback_save_to_file
-from users.keyboard import (
+from Chat_bot.core.bot import Form
+from Chat_bot.users.dao import save_user_to_db
+from Chat_bot.users.services import  user_info_message, send_final_request
+from Chat_bot.users. utils import fallback_save_to_file
+from Chat_bot.users.keyboard import (
     create_author_keyboard, 
     create_keyword_keyboard, 
     create_main_keyboard, 
@@ -38,7 +38,7 @@ async def send_welcome(message: types.Message, state: context.FSMContext):
     await message.answer(
         f"Здравствуйте! Я ваш умный гид по Русскому музею.\n"
         "Какие картины вы бы предпочли сегодня посмотреть?\n"
-        "Введите свой запрос или воспользуйтесь кнопками.\n"
+        "Для ввода запроса воспользуйтесь кнопками.\n"
         "Когда завершите выбор, нажмите \"Отправить запрос\".",
         reply_markup=create_main_keyboard()
     )
@@ -92,7 +92,7 @@ async def process_phrase_choice(message: types.Message, state: context.FSMContex
         # Сохраняем фразу в состояние
         await state.update_data(phrase=user_input)
         await message.answer(
-            "Фраза успешно сохранена! Вы можете выбрать ключевые слова, автора или нажать \"Отправить запрос\".",
+            "Фраза успешно сохранена! Для подтверждения нажать \"Подтвердить\".",
             reply_markup=create_final_keyboard()
         )
         await state.set_state(Form.menu)
@@ -111,7 +111,7 @@ async def process_keywords(message: types.Message, state: context.FSMContext):
         # Сохраняем выбранное ключевое слово
         await state.update_data(keywords=user_input)
         await message.answer(
-            "Ключевые слова сохранены! Вы можете выбрать фразу, автора или нажать \"Отправить запрос\".",
+            "Ключевые слова сохранены! Для подтверждения нажать \"Подтвердить\".",
             reply_markup=create_final_keyboard()
         )
         await state.set_state(Form.menu)
@@ -129,7 +129,7 @@ async def process_author(message: types.Message, state: context.FSMContext):
         # Сохраняем автора
         await state.update_data(author=user_author)
         await message.answer(
-            "Автор успешно сохранён! Вы можете выбрать фразу, ключевые слова или нажать \"Отправить запрос\".",
+            "Автор успешно сохранён! Для подтверждения нажать \"Подтвердить\".",
             reply_markup=create_final_keyboard()
         )
         await state.set_state(Form.menu)
