@@ -46,6 +46,8 @@
 
 ## 3. Рекомендательная система
 
+[EDA.ipynb](Model/EDA.ipynb)
+
 ### 3.1. Векторизация с применением RuBERT
 
 Для получения эмбеддингов ключевых слов применен [DeepPavlov RuBERT base cased](https://huggingface.co/DeepPavlov/rubert-base-cased). В итоге получили датасет размерностью (35707, 768).
@@ -57,6 +59,7 @@
 ![alt text](image.png)
 
 ### 3.3. Рекомендательная система на основе KMeans + KNN
+
 
 ## 4. Итог:
 
