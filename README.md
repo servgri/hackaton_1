@@ -46,7 +46,7 @@
 
 ## 3. Рекомендательная система
 
-[EDA.ipynb](Model/EDA.ipynb)
+[EDA.ipynb](Model/EDAfinal.ipynb)
 
 ### 3.1. Векторизация с применением RuBERT
 
