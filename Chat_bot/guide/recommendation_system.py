@@ -5,7 +5,7 @@ from transformers import BertTokenizer, BertModel
 import torch
 import joblib
 
-def load_kmeans_model(model_path="kmeans_model2.joblib"):
+def load_kmeans_model(model_path="Model\data\kmeans_model.joblib"):
     """
     Загрузка модели KMeans.
     """
@@ -21,7 +21,7 @@ def load_rubert_model():
     model.eval()  # Переключение в режим инференса
     return tokenizer, model
 
-def load_data(data_path='data_for_database_final2.parquet'):
+def load_data(data_path='data_for_database_final.parquet'):
     """
     Загрузка данных и их подготовка.
     """
@@ -30,29 +30,11 @@ def load_data(data_path='data_for_database_final2.parquet'):
     embeddings = np.vstack(df["embeddings"].apply(np.array))  # Преобразуем эмбеддинги в numpy-массив
     return df, embeddings
 
-
-conn = psycopg2.connect(
-    dbname="",
-    user="",
-    password="",
-    host="",
-    port=""
-)
-cursor = conn.cursor()
-
-
-# Загрузка RuBERT модели и токенизатора
-model_name = 'rubert-base-cased'
-tokenizer = BertTokenizer.from_pretrained(model_name)
-model = BertModel.from_pretrained(model_name)
-
-# Функция для получения эмбеддингов запроса
-def get_embeddings(query):
+def get_query_embedding(user_query, tokenizer, model):
     """
     Преобразование текстового запроса пользователя в эмбеддинг.
     """
-    inputs = tokenizer(query, padding=True, truncation=True, return_tensors="pt", max_length=512)
-
+    inputs = tokenizer(user_query, padding=True, truncation=True, return_tensors="pt", max_length=512)
     with torch.no_grad():
         outputs = model(**inputs)
         query_embedding = outputs.last_hidden_state.mean(dim=1).squeeze().cpu().numpy()
@@ -100,3 +82,8 @@ def get_recommendations(
     recommended_indices = cluster_data.iloc[indices[0]].index
     recommended_exhibits = df.loc[recommended_indices][["title", "author", "date_category"]].to_dict(orient="records")
     return recommended_exhibits
+
+# user_query = "диван яблоко персик"
+# recommendations = get_recommendations(user_query)
+
+# print(recommendations)
